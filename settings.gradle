@@ -1,1 +1,1 @@
-include ':app', ':Library-Location'
+include ':app', ':Library-Location', ':Library-View-Compass'

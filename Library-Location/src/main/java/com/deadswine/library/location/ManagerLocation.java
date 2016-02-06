@@ -139,6 +139,10 @@ public class ManagerLocation {
 
             mLocationManager = null;
             mLocationListener = null;
+
+            mContext = null;
+            instance = null;
+
         }
 
     }
