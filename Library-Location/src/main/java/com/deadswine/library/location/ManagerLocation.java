@@ -12,17 +12,11 @@ import android.widget.Toast;
 
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.Otto;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-
 
 /**
  * Created by Adam Fręśko - Deadswine Studio on 06.02.2016.
  * Deadswine.com
  */
-
 public class ManagerLocation {
     private final String TAG = this.getClass().getSimpleName();
     boolean isDebug = true;
@@ -30,7 +24,6 @@ public class ManagerLocation {
     private void log(String log) {
         Log.d(TAG, log);
     }
-
 
     static final int UPDATE_INTERVAL = 1000;
     static final int UPDATE_INTERVAL_FASTEST = 500;
@@ -43,6 +36,7 @@ public class ManagerLocation {
     private android.location.LocationListener mLocationListener;
     private LocationManager mLocationManager;
 
+    private boolean isInProggress;
 
     /**
      * Returns singleton object.<br> Its best to prevent multiple instantiation of this class
@@ -108,15 +102,17 @@ public class ManagerLocation {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            Toast.makeText(mContext, "Location Permissions is not granted", Toast.LENGTH_SHORT).show();
 
+        } else {
             if (mLocationManager == null) {
                 mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             }
 
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, UPDATE_DISTANCE, mLocationListener);
+            isInProggress = true;
 
-        } else {
-            Toast.makeText(mContext, "Location Permissions is not granted", Toast.LENGTH_SHORT).show();
+
         }
 
 
@@ -133,7 +129,10 @@ public class ManagerLocation {
 
                 if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+                    Toast.makeText(mContext, "Location Permissions is not granted", Toast.LENGTH_SHORT).show();
+                } else {
                     mLocationManager.removeUpdates(mLocationListener);
+                    isInProggress = false;
                 }
 
             }
@@ -141,6 +140,25 @@ public class ManagerLocation {
             mLocationManager = null;
             mLocationListener = null;
         }
+
+    }
+
+    /**
+     * Returns true if location tracking has started otherwise returns false
+     *
+     * @return
+     */
+    public boolean locationToggle() {
+
+        if (isInProggress) {
+            locationPause();
+            return false;
+        } else {
+            locationStart();
+
+            return true;
+        }
+
 
     }
 

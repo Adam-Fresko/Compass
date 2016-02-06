@@ -8,8 +8,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import com.deadswine.library.location.ManagerLocation;
+import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.Otto;
+import com.squareup.otto.Subscribe;
 
 public class MainActivity extends AppCompatActivity {
+
+    private TextView tvHello;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +27,43 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        tvHello = (TextView) findViewById(R.id.main_tv_hello);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+
+                if (ManagerLocation.getInstance(getApplicationContext()).locationToggle()) {
+
+                    Snackbar.make(view, "Location tracking enabled", Snackbar.LENGTH_LONG)
+                            //.setAction("Action", null)
+                            .show();
+
+                } else {
+                    Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
+                            //.setAction("Action", null)
+                            .show();
+                }
+
             }
         });
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Otto.getInstance().unregister(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Otto.getInstance().register(this);
     }
 
     @Override
@@ -49,4 +87,14 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    @Subscribe
+    public void onEventLocationChanged(EventLocationChanged event) {
+
+        tvHello.setText("Location: " + event.getLocation().toString());
+
+    }
+
+
 }
