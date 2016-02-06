@@ -28,4 +28,5 @@ dependencies {
 
 
     compile project(':Library-Location')
+    compile project(':Library-View-Compass')
 }
