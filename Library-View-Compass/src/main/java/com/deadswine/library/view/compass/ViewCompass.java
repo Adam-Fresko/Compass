@@ -8,11 +8,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.support.v7.widget.ViewUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -44,13 +41,17 @@ public class ViewCompass extends View {
     private Paint mPaintRingInner;
     private Paint mPaintInnerGradient;
     private Paint mPaintInnerText;
+    private Paint mPaintMagnetometerArrow;
+
 
     private Paint mPaintTarget;
     private Bitmap mBitmapInnerRose;
     private Bitmap mBitmapTarget;
 
 
-    private Path mPathInner;
+    private Path mPathInnerCircle;
+    private Path mPathMagnetomereArrow;
+
 
     private int circleRadius;
     private int circleRadiusInner;
@@ -73,6 +74,7 @@ public class ViewCompass extends View {
     private float angleBase;
     private float angleCurrent; // used for magnetic rotation
     private float angleTarget;
+    private float angleMagnetometer;
 
     {
 
@@ -115,6 +117,12 @@ public class ViewCompass extends View {
         mPaintTarget.setColor(getResources().getColor(R.color.compass_target_background));
         mBitmapTarget = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_navigation_black_24dp),targetWidth , targetWidth, UtilitiesView.ScalingLogic.FIT);
 
+        mPaintMagnetometerArrow = new Paint();
+        mPaintMagnetometerArrow.setStyle(Paint.Style.FILL);
+        mPaintMagnetometerArrow.setAntiAlias(true);
+        mPaintMagnetometerArrow.setColor(Color.RED);
+
+
         mPaintRingOuter = new Paint();
         mPaintRingOuter.setColor(getResources().getColor(R.color.compass_ring_outer));
         mPaintRingOuter.setStyle(Paint.Style.FILL);
@@ -126,7 +134,10 @@ public class ViewCompass extends View {
         mPaintRingInner.setAntiAlias(true);
 
 
-        mPathInner = new Path();
+        mPathInnerCircle = new Path();
+        mPathMagnetomereArrow = new Path();
+
+
 
 
         circleRingOuterWidth = UtilitiesView.dpToPx(getContext(), 12);
@@ -183,6 +194,8 @@ public class ViewCompass extends View {
         angleBase = 270; //-90 base
         angleCurrent = 0;
         angleTarget = 0;
+        angleMagnetometer =0;
+
         RadialGradient gradient = new RadialGradient(centerX, centerY, circleRadius - circleInnerPadding, gradientColors, gradientStepps, Shader.TileMode.CLAMP);
         //  mBitmapInnerRose = BitmapFactory.decodeResource(getResources(), R.drawable.rose);
 
@@ -191,8 +204,8 @@ public class ViewCompass extends View {
 
         mPaintInnerGradient.setShader(gradient);
 
-        mPathInner.reset();
-        mPathInner.addCircle(centerX, centerY, (circleRadius - circleInnerPadding) - 20, Path.Direction.CW);
+        mPathInnerCircle.reset();
+        mPathInnerCircle.addCircle(centerX, centerY, (circleRadius - circleInnerPadding) - 20, Path.Direction.CW);
 
 
     }
@@ -227,14 +240,14 @@ public class ViewCompass extends View {
             angleCurrent += 1;
 
         } else {
-            canvas.rotate(angleBase + angleCurrent, centerX, centerY); // -90 makes fist letter pointing to top
+            canvas.rotate(angleBase + angleMagnetometer, centerX, centerY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
 
         }
 
         drawTarget(canvas, angleTarget);
-
+        drawMagnetometerArrow(canvas,angleMagnetometer);
         postInvalidateDelayed(16); // 60 fps
     }
 
@@ -268,7 +281,7 @@ public class ViewCompass extends View {
     private void drawTextDirections(Canvas canvas) {
 
         // Skip fist letter as it should not be rotated its at position "0"
-        canvas.drawTextOnPath("N", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
+        canvas.drawTextOnPath("N", mPathInnerCircle, 0, circleRingOuterWidth, mPaintInnerText);
 
         for (int i = 1; i < letters.length; i++) {
             drawRotatedText(letters[i], canvas);
@@ -280,7 +293,7 @@ public class ViewCompass extends View {
 
     private void drawRotatedText(String text, Canvas canvas) {
         canvas.rotate(45, centerX, centerY); //FIXME we should take in to account width of the letters and place angle on the correct position
-        canvas.drawTextOnPath(text, mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
+        canvas.drawTextOnPath(text, mPathInnerCircle, 0, circleRingOuterWidth, mPaintInnerText);
 
     }
 
@@ -298,6 +311,14 @@ public class ViewCompass extends View {
     }
 
 
+    private void drawMagnetometerArrow(Canvas canvas, float angle){
+
+        //FIXME missing rotation
+        canvas.drawPath(mPathMagnetomereArrow,mPaintMagnetometerArrow);
+
+    }
+
+
     public PointF getPointOnCircle(float radius, float angleInDegrees, PointF origin) {
         // Convert from degrees to radians via multiplication by PI/180
         float x = (float) (radius * Math.cos(angleInDegrees * Math.PI / 180F)) + origin.x;
@@ -308,4 +329,12 @@ public class ViewCompass extends View {
     }
 
 
+    public void setAngleTarget(float angleTarget) {
+        this.angleTarget = angleTarget;
+    }
+
+    public void setAngleMagnetometer(float angleMagnetometer) {
+        this.angleMagnetometer = angleMagnetometer;
+    }
 }
+
