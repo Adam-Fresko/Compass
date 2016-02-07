@@ -334,6 +334,7 @@ public class ViewCompass extends View {
     }
 
     public void setAngleMagnetometer(float angleMagnetometer) {
+        log("setAngleMagnetometer: " +angleMagnetometer);
         this.angleMagnetometer = angleMagnetometer;
     }
 }

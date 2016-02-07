@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import com.deadswine.library.location.ManagerLocation;
 import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
 import com.deadswine.library.location.Otto.Otto;
 import com.deadswine.library.view.compass.FragmentCompass;
 import com.deadswine.library.view.compass.FragmentCompassMap;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
     private FragmentCompass mFragmentCompass;
     private FragmentCompassMap mFragmentMapCompass;
+    private String TAG = this.getClass().getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +150,15 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         mFragmentMapCompass.setLocation(event.getLocation());
     }
+
+    @Subscribe
+    public void onEventMagneticDirectionChanged(EventMagneticDirectionChanged event) {
+
+
+        Log.d(TAG, "onEventMagneticDirectionChanged: " + event.getAngle());
+
+    }
+
 
     @Override
     public void onMapTargetChoosen(LatLng targetLatLng) {
