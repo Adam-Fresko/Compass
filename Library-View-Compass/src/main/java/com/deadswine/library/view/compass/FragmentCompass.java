@@ -26,6 +26,8 @@ public class FragmentCompass  extends Fragment{
 
     private View mContentView;
 
+    private ViewCompass mViewCompass;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = super.onCreateView(inflater, container, savedInstanceState);
@@ -33,11 +35,13 @@ public class FragmentCompass  extends Fragment{
             mContentView = inflater.inflate(R.layout.fragment_compass, container, false);
         }
 
-
+        mViewCompass = (ViewCompass) mContentView.findViewById(R.id.compass_view_compass);
 
         return mContentView;
     }
 
 
-
+    public ViewCompass getViewCompass() {
+        return mViewCompass;
+    }
 }
