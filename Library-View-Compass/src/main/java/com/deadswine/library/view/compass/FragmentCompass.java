@@ -26,8 +26,6 @@ public class FragmentCompass  extends Fragment{
 
     private View mContentView;
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = super.onCreateView(inflater, container, savedInstanceState);
