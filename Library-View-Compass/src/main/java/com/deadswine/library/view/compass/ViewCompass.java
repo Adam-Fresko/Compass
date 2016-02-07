@@ -211,7 +211,7 @@ public class ViewCompass extends View {
     }
 
 
-    boolean testRotation = true;
+    boolean testRotation = false;
 
     @Override
     protected void onDraw(Canvas canvas) {
