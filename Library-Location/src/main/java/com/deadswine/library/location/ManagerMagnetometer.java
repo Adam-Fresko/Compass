@@ -11,6 +11,8 @@ import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
 import com.deadswine.library.location.Otto.Otto;
 
+import java.util.ArrayDeque;
+
 
 /**
  * Created by Adam Fręśko - Deadswine Studio on 07.02.2016.
@@ -40,6 +42,8 @@ public class ManagerMagnetometer implements SensorEventListener {
     private boolean hasGeomagneticData = false;
     private double  rotationInDegrees;
 
+    private AngleLowpassFilter mAngleLowpassFilter;
+
     /**
      * Returns singleton object.<br> Its best to prevent multiple instantiation of this class
      *
@@ -66,6 +70,8 @@ public class ManagerMagnetometer implements SensorEventListener {
 
         if (mSensorManager == null) {
 
+            mAngleLowpassFilter = new AngleLowpassFilter();
+
             mSensorManager = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -87,6 +93,8 @@ public class ManagerMagnetometer implements SensorEventListener {
             mSensorManager = null;
             mMagnetometer = null;
             mAccelerometer = null;
+
+            mAngleLowpassFilter=null;
         }
     }
 
@@ -116,9 +124,10 @@ public class ManagerMagnetometer implements SensorEventListener {
                 float orientationMatrix[] = new float[3];
                 SensorManager.getOrientation(rotationMatrix, orientationMatrix);
                 float rotationInRadians = orientationMatrix[0];
-                rotationInDegrees = Math.toDegrees(rotationInRadians);
 
-               // log("Magnetometer Rotation in degrees: " + rotationInDegrees);
+                mAngleLowpassFilter.add(rotationInRadians); // this will smooth readings a litle
+                rotationInDegrees = Math.toDegrees(mAngleLowpassFilter.average());
+
                 Otto.getInstance().post(new EventMagneticDirectionChanged(rotationInDegrees));
             }
         }
@@ -127,5 +136,40 @@ public class ManagerMagnetometer implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+
+    public class AngleLowpassFilter {
+
+        private final int LENGTH = 10;
+
+        private float sumSin, sumCos;
+
+        private ArrayDeque<Float> queue = new ArrayDeque<Float>();
+
+        public void add(float radians){
+
+            sumSin += (float) Math.sin(radians);
+
+            sumCos += (float) Math.cos(radians);
+
+            queue.add(radians);
+
+            if(queue.size() > LENGTH){
+
+                float old = queue.poll();
+
+                sumSin -= Math.sin(old);
+
+                sumCos -= Math.cos(old);
+            }
+        }
+
+        public float average(){
+
+            int size = queue.size();
+
+            return (float) Math.atan2(sumSin / size, sumCos / size);
+        }
     }
 }
