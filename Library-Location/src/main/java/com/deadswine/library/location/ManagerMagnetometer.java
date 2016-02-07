@@ -115,6 +115,7 @@ public class ManagerMagnetometer implements SensorEventListener {
                 rotationInDegrees = Math.toDegrees(rotationInRadians);
 
                // log("Magnetometer Rotation in degrees: " + rotationInDegrees);
+
             }
         }
     }

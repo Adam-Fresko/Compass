@@ -31,11 +31,10 @@ public class FragmentCompassExtended extends FragmentCompass {
     }
 
 
-    
     @Subscribe
-    public void onEventMagneticDirectionChanged(EventMagneticDirectionChanged event){
+    public void onEventMagneticDirectionChanged(EventMagneticDirectionChanged event) {
 
-
+        getViewCompass().setAngleMagnetometer((float) event.getAngle());
 
     }
 }
