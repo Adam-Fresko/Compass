@@ -78,8 +78,14 @@ public class UtilitiesView {
     }
 
 
-
-
+    /**
+     * Found here http://developer.sonymobile.com/2011/06/27/how-to-scale-images-for-your-android-application/
+     * @param unscaledBitmap
+     * @param dstWidth
+     * @param dstHeight
+     * @param scalingLogic
+     * @return
+     */
     public static Bitmap createScaledBitmap(Bitmap unscaledBitmap, int dstWidth, int dstHeight,
                                             ScalingLogic scalingLogic) {
         Rect srcRect = calculateSrcRect(unscaledBitmap.getWidth(), unscaledBitmap.getHeight(),
