@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.EventRequestPermission;
 import com.deadswine.library.location.Otto.Otto;
 
 /**
@@ -103,6 +104,8 @@ public class ManagerLocation {
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             Toast.makeText(mContext, "Location Permissions is not granted", Toast.LENGTH_SHORT).show();
+
+            Otto.getInstance().post(new EventRequestPermission());
 
         } else {
             if (mLocationManager == null) {
