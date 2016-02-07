@@ -73,10 +73,17 @@ public class ViewCompass extends View {
     private float mAngleTarget;
     private float mAngleMagnetometer;
 
+    private float mAngleMagnetometerOld;
+    private float mAngleMagnetometerTarget;
+
     private boolean mIsAngleTargetSet;
     private boolean mIsAngleMagnetometerSet;
 
+    private int mFramesLeftToDraw;
+
     {
+        mFramesLeftToDraw = 0;
+
 
         mLetters = new String[]{
                 "N", "NE", "E", "SE", "S", "SW", "W", "NW"
@@ -201,12 +208,11 @@ public class ViewCompass extends View {
     }
 
     boolean testRotation = false;
-
+    float mAngleInterpolated;
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        drawBackground(canvas);
         drawCircleRingOuter(canvas);
         drawCircleRingInner(canvas);
         drawCircleInnerBackground(canvas);
@@ -228,23 +234,48 @@ public class ViewCompass extends View {
             mAngleCurrent += 1;
 
         } else {
-            // FIXME this will also require some smoothing as readings jump allover 360 // but it works atm
+            // FIXME this will also require some smoothing// but it works atm
+// // Smoothing prototype code
+//            if (mFramesLeftToDraw <= 10 || mAngleMagnetometer ==mAngleMagnetometerTarget ) {
+//                // we can draw next value interpolation
+//                log("interpolating " + mFramesLeftToDraw);
+//                mAngleInterpolated = UtilitiesView.lerp(mAngleMagnetometerOld, mAngleMagnetometerTarget, (mFramesLeftToDraw * 10) / 100);
+//
+//                canvas.rotate(mAngleBase + (-mAngleInterpolated), mCenterX, mCenterY); // -90 makes fist letter pointing to top
+//                drawTextDirections(canvas);
+//                canvas.restore();
+//
+//                mFramesLeftToDraw++;
+//
+//            } else {
+//                log("NOT interpolating " + mFramesLeftToDraw);
+//                mFramesLeftToDraw = 1;
+//                log("NOT interpolating " + mFramesLeftToDraw);
+//                mAngleMagnetometerOld = mAngleInterpolated;
+//                mAngleMagnetometerTarget = mAngleMagnetometer;
+//
+//                canvas.rotate(mAngleBase + (-mAngleMagnetometerOld), mCenterX, mCenterY); // -90 makes fist letter pointing to top
+//                drawTextDirections(canvas);
+//                canvas.restore();
+//
+//            }
+
             canvas.rotate(mAngleBase + (-mAngleMagnetometer), mCenterX, mCenterY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
+
 
         }
 
         drawMagnetometerArrow(canvas, mAngleMagnetometer);
 
-        if (mIsAngleTargetSet)
+        if (mIsAngleTargetSet) {
             drawTarget(canvas, mAngleTarget);
+        }
 
-        postInvalidateDelayed(16); // 60 fps
-    }
 
-    private void drawBackground(Canvas canvas) {
-        canvas.drawColor(Color.BLUE);
+    postInvalidateDelayed(16); // 60 fps
+
     }
 
     private void drawCircleRingOuter(Canvas canvas) {
@@ -290,12 +321,13 @@ public class ViewCompass extends View {
 
     PointF pointTargetPosition;
 
+
     private void drawTarget(Canvas canvas, float angle) {
 
         pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
-        //  canvas.rotate(mAngleBase, mCenterX, mCenterY);
+
 
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
         canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
@@ -321,8 +353,8 @@ public class ViewCompass extends View {
 
     public void setAngleMagnetometer(float angle) {
 
-            mAngleMagnetometer = angle;
-            mIsAngleMagnetometerSet = true;
+        mAngleMagnetometer = angle;
+        mIsAngleMagnetometerSet = true;
 
     }
 }

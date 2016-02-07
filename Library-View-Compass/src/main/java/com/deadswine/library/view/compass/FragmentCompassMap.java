@@ -53,6 +53,7 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
     public interface InterfaceMap {
 
         void onMapTargetChoosen(LatLng targetLatLng);
+
         void onMapLocationChanged(LatLng targetLatLng);
     }
 
@@ -108,9 +109,13 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
 
     public void setLocation(Location location) {
 
+        if (mContentView == null) {
+            return;
+        }
 
-        if (mMapMarkerLocation != null)
+        if (mMapMarkerLocation != null) {
             mMapMarkerLocation.remove();
+        }
 
         LatLng tmp = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -121,8 +126,6 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
         markerOptions.draggable(false);
 
         mMapMarkerLocation = mGoogleMap.addMarker(markerOptions);
-
-
 
         drawLineBetweenLocationAndTarget();
     }

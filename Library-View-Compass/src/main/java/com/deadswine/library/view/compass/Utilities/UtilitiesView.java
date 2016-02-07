@@ -43,12 +43,9 @@ public class UtilitiesView {
         return p;
     }
 
-    public static PointF getPointOnCircle(float radius, float angleInDegrees, PointF origin) {
-        // Convert from degrees to radians via multiplication by PI/180
-        float x = (float) (radius * Math.cos(angleInDegrees * Math.PI / 180F)) + origin.x;
-        float y = (float) (radius * Math.sin(angleInDegrees * Math.PI / 180F)) + origin.y;
 
-        return new PointF(x, y);
+    public static float lerp(float a, float b, float f) {
+        return a + f * (b - a);
     }
 
 

@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        tvHello = (TextView) findViewById(R.id.main_tv_hello);
-
         mFragmentCompass = new com.deadswine.compass.FragmentCompassExtended();
 
         mFragmentMapCompass = new FragmentCompassMap();
@@ -72,77 +70,45 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
         mViewPager.setAdapter(getAdapter());
 
-
-        // mViewPager.setOnPageChangeListener(this);
         mViewPager.setOffscreenPageLimit(2);
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(mViewPager);
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                if (ManagerLocation.getInstance(getApplicationContext()).locationToggle()) {
-                    ManagerMagnetometer.getInstance(getApplicationContext()).start();
-
-                    Snackbar.make(view, "Location tracking enabled", Snackbar.LENGTH_LONG)
-                            //.setAction("Action", null)
-                            .show();
-
-                } else {
-                    ManagerMagnetometer.getInstance(getApplicationContext()).stop();
-
-                    Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
-                            //.setAction("Action", null)
-                            .show();
-                }
-
-            }
-        });
     }
-
-
 
     @Override
     protected void onPause() {
         super.onPause();
 
+        ManagerMagnetometer.getInstance(getApplicationContext()).stop();
+
+//            Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
+//                    //.setAction("Action", null)
+//                    .show();
+
         Otto.getInstance().unregister(this);
+
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+
+
         Otto.getInstance().register(this);
+
+        ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
+
+        ManagerMagnetometer.getInstance(getApplicationContext()).start();
+
+        Snackbar.make(findViewById(R.id.toolbar), "Location tracking enabled", Snackbar.LENGTH_LONG)
+                //.setAction("Action", null)
+                .show();
+
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
 
     @Subscribe
     public void onEventRequestPermission(EventRequestPermission event) {
@@ -151,16 +117,12 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
     }
 
-
     @Subscribe
     public void onEventLocationChanged(EventLocationChanged event) {
-
-        tvHello.setText("Location: " + event.getLocation().toString());
 
         mFragmentMapCompass.setLocation(event.getLocation());
 
     }
-
 
     @Override
     public void onMapTargetChoosen(LatLng targetLatLng) {
@@ -176,21 +138,16 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         computeTargetAngle();
     }
 
-
     public void computeTargetAngle(){
-
         if(mLastLocation ==null || mLastTarget == null)
             return;
-
 
         double tmp = UtilitiesMap.calcRotationAngleInDegrees( mLastTarget,mLastLocation);
         float computedAngle = (float)tmp;
         Log.d(TAG, "computedAngle double: " + tmp) ;
         Log.d(TAG, "computedAngle float: " + computedAngle) ;
         mFragmentCompass.getViewCompass().setAngleTarget(computedAngle);
-
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -250,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
             return mFabList.get(position);
         }
-
 
     }
 
