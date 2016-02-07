@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     }
 
 
+
     @Override
     protected void onPause() {
         super.onPause();
