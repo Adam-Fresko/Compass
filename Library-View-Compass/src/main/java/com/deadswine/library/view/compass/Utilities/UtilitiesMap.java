@@ -99,7 +99,7 @@ public class UtilitiesMap {
         // NOTE: adding to an angle rotates it clockwise.
         // subtracting would rotate it counter-clockwise
         // addition would rotate it clockwise
-        theta += Math.PI/2.0; // comment to disable rottation
+        theta -= Math.PI/2.0; // comment to disable rottation
 
         // convert from radians to degrees
         // this will give you an angle from [0->270],[-180,0]

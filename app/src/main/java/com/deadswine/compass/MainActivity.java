@@ -1,8 +1,6 @@
 package com.deadswine.compass;
 
 import android.Manifest;
-import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,7 +21,6 @@ import android.widget.TextView;
 import com.deadswine.library.location.ManagerLocation;
 import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
-import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
 import com.deadswine.library.location.Otto.EventRequestPermission;
 import com.deadswine.library.location.Otto.Otto;
 import com.deadswine.library.view.compass.FragmentCompassExtended;

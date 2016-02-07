@@ -10,13 +10,11 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.location.Location;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
 import com.deadswine.library.view.compass.Utilities.UtilitiesView;
-import com.google.android.gms.maps.model.LatLng;
 
 
 /**
@@ -33,10 +31,10 @@ public class ViewCompass extends View {
     }
 
 
-    private int[] gradientColors;
-    private float[] gradientStepps;
+    private int[] mGradientColors;
+    private float[] mGradientSteps;
 
-    private String[] letters;
+    private String[] mLetters;
 
     private Paint mPaintInnerRose;
     private Paint mPaintRingOuter;
@@ -45,61 +43,54 @@ public class ViewCompass extends View {
     private Paint mPaintInnerText;
     private Paint mPaintMagnetometerArrow;
 
-
     private Paint mPaintTarget;
     private Bitmap mBitmapInnerRose;
     private Bitmap mBitmapTarget;
 
-
     private Path mPathInnerCircle;
     private Path mPathMagnetomereArrow;
 
+    private int mCircleRadius;
+    private int mCircleRadiusInner;
 
-    private int circleRadius;
-    private int circleRadiusInner;
+    private int mCircleRingOuterWidth;
+    private int mCircleRingOuterPadding;
 
-    private int circleRingOuterWidth;
-    private int circleRingOuterPadding;
+    private int mCircleRingInnerWidth;
+    private int mCircleRingInnerPadding;
+    private int mCircleInnerPadding;
 
-    private int circleRingInnerWidth;
-    private int circleRingInnerPadding;
-    private int circleInnerPadding;
+    private int mTargetWidth;
 
+    private int mScalePadding;
 
-    private int targetWidth;
+    private int mCenterX;
+    private int mCenterY;
 
-    private int scalePadding;
-
-    private int centerX;
-    private int centerY;
-
-    private float angleBase;
-    private float angleCurrent; // used for rotation testing
-    private float angleTarget;
-    private float angleMagnetometer;
-
+    private float mAngleBase;
+    private float mAngleCurrent; // used for rotation testing
+    private float mAngleTarget;
+    private float mAngleMagnetometer;
 
     {
 
-        letters = new String[]{
+        mLetters = new String[]{
                 "N", "NE", "E", "SE", "S", "SW", "W", "NW"
         };
 
-
-        gradientColors = new int[]{
+        mGradientColors = new int[]{
                 getResources().getColor(R.color.compass_inner_gradient_start),
                 getResources().getColor(R.color.compass_inner_gradient_start),
                 getResources().getColor(R.color.compass_inner_gradient_end)
         };
 
-        gradientStepps = new float[]{
+        mGradientSteps = new float[]{
                 0f,
                 0.85f,
                 1f
         };
 
-
-        targetWidth = UtilitiesView.dpToPx(getContext(), 12);
+        mTargetWidth = UtilitiesView.dpToPx(getContext(), 12);
 
         mPaintInnerGradient = new Paint();
         mPaintInnerGradient.setDither(true);
@@ -118,13 +109,12 @@ public class ViewCompass extends View {
 
         mPaintTarget = new Paint();
         mPaintTarget.setColor(getResources().getColor(R.color.compass_target_background));
-        mBitmapTarget = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_navigation_black_24dp),targetWidth , targetWidth, UtilitiesView.ScalingLogic.FIT);
+        mBitmapTarget = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_navigation_black_24dp), mTargetWidth, mTargetWidth, UtilitiesView.ScalingLogic.FIT);
 
         mPaintMagnetometerArrow = new Paint();
         mPaintMagnetometerArrow.setStyle(Paint.Style.FILL);
         mPaintMagnetometerArrow.setAntiAlias(true);
         mPaintMagnetometerArrow.setColor(Color.RED);
-
 
         mPaintRingOuter = new Paint();
         mPaintRingOuter.setColor(getResources().getColor(R.color.compass_ring_outer));
@@ -141,30 +131,23 @@ public class ViewCompass extends View {
         mPathMagnetomereArrow = new Path();
 
 
+        mCircleRingOuterWidth = UtilitiesView.dpToPx(getContext(), 12);
+        mCircleRingOuterPadding = mCircleRingOuterWidth;
+
+        mCircleRingInnerWidth = UtilitiesView.dpToPx(getContext(), 4);
+        mCircleRingInnerPadding = mCircleRingOuterWidth + mCircleRingOuterPadding;
 
 
-        circleRingOuterWidth = UtilitiesView.dpToPx(getContext(), 12);
-        circleRingOuterPadding = circleRingOuterWidth;
+        mCircleInnerPadding = mCircleRingInnerPadding + mCircleRingInnerWidth;
 
-        circleRingInnerWidth = UtilitiesView.dpToPx(getContext(), 4);
-        circleRingInnerPadding = circleRingOuterWidth + circleRingOuterPadding;
-
-
-        circleInnerPadding = circleRingInnerPadding + circleRingInnerWidth;
-
-        scalePadding = circleRingInnerPadding + circleRingInnerWidth + UtilitiesView.dpToPx(getContext(), 8);
-
-
-
+        mScalePadding = mCircleRingInnerPadding + mCircleRingInnerWidth + UtilitiesView.dpToPx(getContext(), 8);
 
 
     }
-
 
     public ViewCompass(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
-
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -186,33 +169,32 @@ public class ViewCompass extends View {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        log("onSizeChanged");
 
-        circleRadius = getWidth() / 2;
+        mCircleRadius = getWidth() / 2;
 
-        centerX = getWidth() / 2;
-        centerY = getHeight() / 2;
+        mCenterX = getWidth() / 2;
+        mCenterY = getHeight() / 2;
 
-        angleBase = 270; //-90 base
-        angleCurrent = 0;
-        angleTarget = 0;
-        angleMagnetometer =0;
+        mAngleBase = 270; //-90 base
+        mAngleCurrent = 0;
+        mAngleTarget = 0;
+        mAngleMagnetometer = 0;
 
-        RadialGradient gradient = new RadialGradient(centerX, centerY, circleRadius - circleInnerPadding, gradientColors, gradientStepps, Shader.TileMode.CLAMP);
-        //  mBitmapInnerRose = BitmapFactory.decodeResource(getResources(), R.drawable.rose);
+        RadialGradient gradient = new RadialGradient(mCenterX, mCenterY, mCircleRadius - mCircleInnerPadding, mGradientColors, mGradientSteps, Shader.TileMode.CLAMP);
 
-        mBitmapInnerRose = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.rose), (circleRadius), (circleRadius), UtilitiesView.ScalingLogic.FIT);
-        // mBitmapInnerRose = UtilitiesView.decodeSampledBitmapFromResource(getResources(), R.drawable.rose,(circleRadius - circleInnerPadding)/4,(circleRadius - circleInnerPadding)/4);
+
+        mBitmapInnerRose = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.rose), (mCircleRadius), (mCircleRadius), UtilitiesView.ScalingLogic.FIT);
+
 
         mPaintInnerGradient.setShader(gradient);
 
         mPathInnerCircle.reset();
-        mPathInnerCircle.addCircle(centerX, centerY, (circleRadius - circleInnerPadding) - 20, Path.Direction.CW);
-
+        mPathInnerCircle.addCircle(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding) - 20, Path.Direction.CW);
 
     }
-
 
     boolean testRotation = false;
 
@@ -228,30 +210,29 @@ public class ViewCompass extends View {
         drawCircleInnerPin(canvas);
 
         // now we need to add rotation logic// rotating canvas and then resetting should be enough
-
         canvas.save();
 
         if (testRotation) {
-            if (angleCurrent == 360)
-                angleCurrent = 0;
+            if (mAngleCurrent == 360) {
+                mAngleCurrent = 0;
+            }
 
-
-            canvas.rotate(angleBase + angleCurrent, centerX, centerY); // -90 makes fist letter pointing to top
+            canvas.rotate(mAngleBase + mAngleCurrent, mCenterX, mCenterY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
 
-            angleCurrent += 1;
+            mAngleCurrent += 1;
 
         } else {
             // FIXME this will also require some smoothing as readings jump allover 360 // but it works atm
-            canvas.rotate(angleBase + (-angleMagnetometer), centerX, centerY); // -90 makes fist letter pointing to top
+            canvas.rotate(mAngleBase + (-mAngleMagnetometer), mCenterX, mCenterY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
 
         }
-        drawMagnetometerArrow(canvas,angleMagnetometer);
+        drawMagnetometerArrow(canvas, mAngleMagnetometer);
 
-        drawTarget(canvas, angleTarget + angleMagnetometer);
+        drawTarget(canvas, mAngleTarget + mAngleMagnetometer);
 
         postInvalidateDelayed(16); // 60 fps
     }
@@ -261,44 +242,43 @@ public class ViewCompass extends View {
     }
 
     private void drawCircleRingOuter(Canvas canvas) {
-        canvas.drawCircle(centerX, centerY, circleRadius - circleRingOuterWidth, mPaintRingOuter);
+        canvas.drawCircle(mCenterX, mCenterY, mCircleRadius - mCircleRingOuterWidth, mPaintRingOuter);
     }
 
     private void drawCircleRingInner(Canvas canvas) {
-        canvas.drawCircle(centerX, centerY, circleRadius - circleRingInnerPadding, mPaintRingInner);
+        canvas.drawCircle(mCenterX, mCenterY, mCircleRadius - mCircleRingInnerPadding, mPaintRingInner);
     }
 
     private void drawCircleInnerBackground(Canvas canvas) {
 
-        canvas.drawCircle(centerX, centerY, circleRadius - circleInnerPadding, mPaintInnerGradient);
+        canvas.drawCircle(mCenterX, mCenterY, mCircleRadius - mCircleInnerPadding, mPaintInnerGradient);
     }
 
     private void drawCircleInnerRose(Canvas canvas) {
 
-        canvas.drawBitmap(mBitmapInnerRose, centerX - (mBitmapInnerRose.getWidth() / 2), centerY - (mBitmapInnerRose.getHeight() / 2), mPaintInnerRose);
+        canvas.drawBitmap(mBitmapInnerRose, mCenterX - (mBitmapInnerRose.getWidth() / 2), mCenterY - (mBitmapInnerRose.getHeight() / 2), mPaintInnerRose);
 
     }
 
     private void drawCircleInnerPin(Canvas canvas) {
-        canvas.drawCircle(centerX, centerY, circleRingOuterWidth, mPaintRingOuter);
+        canvas.drawCircle(mCenterX, mCenterY, mCircleRingOuterWidth, mPaintRingOuter);
     }
 
     private void drawTextDirections(Canvas canvas) {
 
         // Skip fist letter as it should not be rotated its at position "0"
-        canvas.drawTextOnPath("N", mPathInnerCircle, 0, circleRingOuterWidth, mPaintInnerText);
+        canvas.drawTextOnPath("N", mPathInnerCircle, 0, mCircleRingOuterWidth, mPaintInnerText);
 
-        for (int i = 1; i < letters.length; i++) {
-            drawRotatedText(letters[i], canvas);
+        for (int i = 1; i < mLetters.length; i++) {
+            drawRotatedText(mLetters[i], canvas);
 
         }
 
     }
 
-
     private void drawRotatedText(String text, Canvas canvas) {
-        canvas.rotate(45, centerX, centerY); //FIXME we should take in to account width of the letters and place angle on the correct position
-        canvas.drawTextOnPath(text, mPathInnerCircle, 0, circleRingOuterWidth, mPaintInnerText);
+        canvas.rotate(45, mCenterX, mCenterY); //FIXME we should take in to account width of the mLetters and place angle on the correct position
+        canvas.drawTextOnPath(text, mPathInnerCircle, 0, mCircleRingOuterWidth, mPaintInnerText);
 
     }
 
@@ -307,42 +287,35 @@ public class ViewCompass extends View {
     private void drawTarget(Canvas canvas, float angle) {
 
 
-        pointTargetPosition = getPointOnCircle((circleRadius - circleInnerPadding) - 20, angle, new PointF(centerX, centerY));
+        pointTargetPosition = UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
-        canvas.rotate(angleBase, centerX, centerY);
-        canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, targetWidth, mPaintTarget);
+        canvas.rotate(mAngleBase, mCenterX, mCenterY);
+        canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
 
         canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
         canvas.restore();
     }
 
 
-    private void drawMagnetometerArrow(Canvas canvas, float angle){
+    private void drawMagnetometerArrow(Canvas canvas, float angle) {
 
         //FIXME missing rotation
-        canvas.drawPath(mPathMagnetomereArrow,mPaintMagnetometerArrow);
+        canvas.drawPath(mPathMagnetomereArrow, mPaintMagnetometerArrow);
 
     }
 
 
-    public PointF getPointOnCircle(float radius, float angleInDegrees, PointF origin) {
-        // Convert from degrees to radians via multiplication by PI/180
-        float x = (float) (radius * Math.cos(angleInDegrees * Math.PI / 180F)) + origin.x;
-        float y = (float) (radius * Math.sin(angleInDegrees * Math.PI / 180F)) + origin.y;
 
 
-        return new PointF(x, y);
+
+    public void setAngleTarget(float mAngleTarget) {
+        this.mAngleTarget = mAngleTarget;
     }
 
-
-    public void setAngleTarget(float angleTarget) {
-        this.angleTarget = angleTarget;
-    }
-
-    public void setAngleMagnetometer(float angleMagnetometer) {
-     //   log("setAngleMagnetometer: " +angleMagnetometer);
-        this.angleMagnetometer = angleMagnetometer;
+    public void setAngleMagnetometer(float mAngleMagnetometer) {
+        //   log("setAngleMagnetometer: " +mAngleMagnetometer);
+        this.mAngleMagnetometer = mAngleMagnetometer;
     }
 }
 
