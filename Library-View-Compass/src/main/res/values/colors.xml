@@ -12,4 +12,6 @@
     <color name="compass_inner_gradient_start">#42a5f5</color>
     <color name="compass_inner_gradient_end">#01579b</color>
 
+    <color name="compass_target_background">#96bdbdbd</color>
+
 </resources>

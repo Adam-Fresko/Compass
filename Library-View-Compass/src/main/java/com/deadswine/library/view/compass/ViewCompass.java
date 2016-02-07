@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
@@ -44,11 +45,12 @@ public class ViewCompass extends View {
     private Paint mPaintInnerGradient;
     private Paint mPaintInnerText;
 
-
+    private Paint mPaintTarget;
     private Bitmap mBitmapInnerRose;
+    private Bitmap mBitmapTarget;
+
 
     private Path mPathInner;
-
 
     private int circleRadius;
     private int circleRadiusInner;
@@ -58,44 +60,25 @@ public class ViewCompass extends View {
 
     private int circleRingInnerWidth;
     private int circleRingInnerPadding;
-
     private int circleInnerPadding;
+
+
+    private int targetWidth;
 
     private int scalePadding;
 
     private int centerX;
     private int centerY;
 
-    private int angleBase;
-    private int angleCurrent;
+    private float angleBase;
+    private float angleCurrent; // used for magnetic rotation
+    private float angleTarget;
 
     {
 
         letters = new String[]{
                 "N", "NE", "E", "SE", "S", "SW", "W", "NW"
         };
-
-
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("NE", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("E", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("SE", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("s", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("SW", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("W", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
-//
-//        canvas.rotate(45, centerX, centerY);
-//        canvas.drawTextOnPath("NW", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
 
 
         gradientColors = new int[]{
@@ -110,6 +93,9 @@ public class ViewCompass extends View {
                 1f
         };
 
+
+        targetWidth = UtilitiesView.dpToPx(getContext(), 12);
+
         mPaintInnerGradient = new Paint();
         mPaintInnerGradient.setDither(true);
         mPaintInnerGradient.setAntiAlias(true);
@@ -120,10 +106,14 @@ public class ViewCompass extends View {
         mPaintInnerText.setAntiAlias(true);
         mPaintInnerText.setTextSize(UtilitiesView.dpToPx(getContext(), 20));
 
-
         mPaintInnerRose = new Paint();
         mPaintInnerRose.setAntiAlias(true);
         mPaintInnerRose.setFilterBitmap(true);
+
+
+        mPaintTarget = new Paint();
+        mPaintTarget.setColor(getResources().getColor(R.color.compass_target_background));
+        mBitmapTarget = UtilitiesView.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_navigation_black_24dp),targetWidth , targetWidth, UtilitiesView.ScalingLogic.FIT);
 
         mPaintRingOuter = new Paint();
         mPaintRingOuter.setColor(getResources().getColor(R.color.compass_ring_outer));
@@ -149,6 +139,10 @@ public class ViewCompass extends View {
         circleInnerPadding = circleRingInnerPadding + circleRingInnerWidth;
 
         scalePadding = circleRingInnerPadding + circleRingInnerWidth + UtilitiesView.dpToPx(getContext(), 8);
+
+
+
+
 
     }
 
@@ -186,9 +180,9 @@ public class ViewCompass extends View {
         centerX = getWidth() / 2;
         centerY = getHeight() / 2;
 
-        angleBase = -90;
+        angleBase = 270; //-90 base
         angleCurrent = 0;
-
+        angleTarget = 0;
         RadialGradient gradient = new RadialGradient(centerX, centerY, circleRadius - circleInnerPadding, gradientColors, gradientStepps, Shader.TileMode.CLAMP);
         //  mBitmapInnerRose = BitmapFactory.decodeResource(getResources(), R.drawable.rose);
 
@@ -232,14 +226,16 @@ public class ViewCompass extends View {
 
             angleCurrent += 1;
 
-            postInvalidateDelayed(16); // 60 fps
-
         } else {
-
             canvas.rotate(angleBase + angleCurrent, centerX, centerY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
+
         }
+
+        drawTarget(canvas, angleTarget);
+
+        postInvalidateDelayed(16); // 60 fps
     }
 
     private void drawBackground(Canvas canvas) {
@@ -265,14 +261,13 @@ public class ViewCompass extends View {
 
     }
 
-
     private void drawCircleInnerPin(Canvas canvas) {
         canvas.drawCircle(centerX, centerY, circleRingOuterWidth, mPaintRingOuter);
     }
 
-
     private void drawTextDirections(Canvas canvas) {
 
+        // Skip fist letter as it should not be rotated its at position "0"
         canvas.drawTextOnPath("N", mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
 
         for (int i = 1; i < letters.length; i++) {
@@ -284,11 +279,32 @@ public class ViewCompass extends View {
 
 
     private void drawRotatedText(String text, Canvas canvas) {
-
         canvas.rotate(45, centerX, centerY); //FIXME we should take in to account width of the letters and place angle on the correct position
         canvas.drawTextOnPath(text, mPathInner, 0, circleRingOuterWidth, mPaintInnerText);
 
+    }
 
+    PointF pointTargetPosition;
+
+    private void drawTarget(Canvas canvas, float angle) {
+        pointTargetPosition = getPointOnCircle((circleRadius - circleInnerPadding) - 20, angle, new PointF(centerX, centerY));
+
+        canvas.save();
+        canvas.rotate(angleBase, centerX, centerY);
+        canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, targetWidth, mPaintTarget);
+
+        canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
+        canvas.restore();
+    }
+
+
+    public PointF getPointOnCircle(float radius, float angleInDegrees, PointF origin) {
+        // Convert from degrees to radians via multiplication by PI/180
+        float x = (float) (radius * Math.cos(angleInDegrees * Math.PI / 180F)) + origin.x;
+        float y = (float) (radius * Math.sin(angleInDegrees * Math.PI / 180F)) + origin.y;
+
+
+        return new PointF(x, y);
     }
 
 
