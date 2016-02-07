@@ -151,12 +151,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         mFragmentMapCompass.setLocation(event.getLocation());
     }
 
-    @Subscribe
-    public void onEventMagneticDirectionChanged(EventMagneticDirectionChanged event) {
 
-        Log.d(TAG, "onEventMagneticDirectionChanged: " +event.getAngle());
-
-    }
 
 
     @Override
