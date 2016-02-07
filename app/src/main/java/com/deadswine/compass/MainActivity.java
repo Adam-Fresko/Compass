@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.deadswine.library.location.ManagerLocation;
+import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.Otto;
 import com.deadswine.library.view.compass.FragmentCompass;
@@ -72,12 +73,15 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
 
                 if (ManagerLocation.getInstance(getApplicationContext()).locationToggle()) {
+                    ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
                     Snackbar.make(view, "Location tracking enabled", Snackbar.LENGTH_LONG)
                             //.setAction("Action", null)
                             .show();
 
                 } else {
+                    ManagerMagnetometer.getInstance(getApplicationContext()).stop();
+
                     Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
                             //.setAction("Action", null)
                             .show();
