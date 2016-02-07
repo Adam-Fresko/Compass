@@ -1,9 +1,12 @@
 package com.deadswine.compass;
 
+import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -20,6 +23,7 @@ import com.deadswine.library.location.ManagerLocation;
 import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
+import com.deadswine.library.location.Otto.EventRequestPermission;
 import com.deadswine.library.location.Otto.Otto;
 import com.deadswine.library.view.compass.FragmentCompassExtended;
 import com.deadswine.library.view.compass.FragmentCompassMap;
@@ -41,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     private FragmentCompassExtended mFragmentCompass;
     private FragmentCompassMap mFragmentMapCompass;
     private String TAG = this.getClass().getSimpleName();
+
+    private final int REQUEST_CODE = 90;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,17 +138,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     }
 
 
-    public ViewPagerAdapter getAdapter() {
-
-        if (mAdapter == null) {
-
-            mAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        }
-
-        return mAdapter;
-    }
-
-
     @Subscribe
     public void onEventLocationChanged(EventLocationChanged event) {
 
@@ -152,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     }
 
 
+    @Subscribe
+    public void onEventRequestPermission(EventRequestPermission event) {
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+
+    }
 
 
     @Override
@@ -160,48 +161,76 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     }
 
 
-    public class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-        private final List<Boolean> mFabList = new ArrayList<>();
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0) {
+                    //FIXME probably should check for proper permission
+                    ManagerLocation.getInstance(getApplicationContext()).locationToggle();
+                    ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
-        boolean hasAnyFab;
+                }
 
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-            hasAnyFab = false;
+            }
+
         }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-
-
-        public void addFragment(Fragment fragment, String title, boolean hasFab) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-            mFabList.add(hasFab);
-            hasAnyFab = true;
-        }
-
-        public boolean getHasFab(int position) {
-
-            return mFabList.get(position);
-        }
-
-
     }
 
+
+public class ViewPagerAdapter extends FragmentPagerAdapter {
+    private final List<Fragment> mFragmentList = new ArrayList<>();
+    private final List<String> mFragmentTitleList = new ArrayList<>();
+    private final List<Boolean> mFabList = new ArrayList<>();
+
+    boolean hasAnyFab;
+
+    public ViewPagerAdapter(FragmentManager manager) {
+        super(manager);
+        hasAnyFab = false;
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        return mFragmentList.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return mFragmentList.size();
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return mFragmentTitleList.get(position);
+    }
+
+
+    public void addFragment(Fragment fragment, String title, boolean hasFab) {
+        mFragmentList.add(fragment);
+        mFragmentTitleList.add(title);
+        mFabList.add(hasFab);
+        hasAnyFab = true;
+    }
+
+    public boolean getHasFab(int position) {
+
+        return mFabList.get(position);
+    }
+
+
+}
+
+    public ViewPagerAdapter getAdapter() {
+
+        if (mAdapter == null) {
+
+            mAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        }
+
+        return mAdapter;
+    }
 
 }
