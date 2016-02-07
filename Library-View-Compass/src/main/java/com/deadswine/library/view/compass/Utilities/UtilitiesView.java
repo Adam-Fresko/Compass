@@ -33,6 +33,16 @@ public class UtilitiesView {
         return tmp;
     }
 
+
+
+    public static PointF getPosition(float centerX, float centerY, float radius, float angle) {
+
+        PointF p = new PointF((float) (centerX + radius * Math.cos(Math.toRadians(angle))),
+                (float) (centerY + radius* Math.sin(Math.toRadians(angle))));
+
+        return p;
+    }
+
     public static PointF getPointOnCircle(float radius, float angleInDegrees, PointF origin) {
         // Convert from degrees to radians via multiplication by PI/180
         float x = (float) (radius * Math.cos(angleInDegrees * Math.PI / 180F)) + origin.x;

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -71,6 +72,9 @@ public class ViewCompass extends View {
     private float mAngleCurrent; // used for rotation testing
     private float mAngleTarget;
     private float mAngleMagnetometer;
+
+    private boolean mIsAngleTargetSet;
+    private boolean mIsAngleMagnetometerSet;
 
     {
 
@@ -178,7 +182,7 @@ public class ViewCompass extends View {
         mCenterX = getWidth() / 2;
         mCenterY = getHeight() / 2;
 
-        mAngleBase = 270; //-90 base
+        mAngleBase = -90;
         mAngleCurrent = 0;
         mAngleTarget = 0;
         mAngleMagnetometer = 0;
@@ -230,9 +234,11 @@ public class ViewCompass extends View {
             canvas.restore();
 
         }
+
         drawMagnetometerArrow(canvas, mAngleMagnetometer);
 
-        drawTarget(canvas, mAngleTarget + mAngleMagnetometer);
+        if (mIsAngleTargetSet)
+            drawTarget(canvas, mAngleTarget);
 
         postInvalidateDelayed(16); // 60 fps
     }
@@ -286,11 +292,12 @@ public class ViewCompass extends View {
 
     private void drawTarget(Canvas canvas, float angle) {
 
-
-        pointTargetPosition = UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
+        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
-        canvas.rotate(mAngleBase, mCenterX, mCenterY);
+        //  canvas.rotate(mAngleBase, mCenterX, mCenterY);
+
+        canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
         canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
 
         canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
@@ -306,16 +313,17 @@ public class ViewCompass extends View {
     }
 
 
-
-
-
     public void setAngleTarget(float mAngleTarget) {
+
         this.mAngleTarget = mAngleTarget;
+        mIsAngleTargetSet = true;
     }
 
-    public void setAngleMagnetometer(float mAngleMagnetometer) {
-        //   log("setAngleMagnetometer: " +mAngleMagnetometer);
-        this.mAngleMagnetometer = mAngleMagnetometer;
+    public void setAngleMagnetometer(float angle) {
+
+            mAngleMagnetometer = angle;
+            mIsAngleMagnetometerSet = true;
+
     }
 }
 
