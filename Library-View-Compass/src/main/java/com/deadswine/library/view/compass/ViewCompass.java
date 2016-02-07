@@ -10,11 +10,13 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
+import android.location.Location;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
 import com.deadswine.library.view.compass.Utilities.UtilitiesView;
+import com.google.android.gms.maps.model.LatLng;
 
 
 /**
@@ -72,9 +74,10 @@ public class ViewCompass extends View {
     private int centerY;
 
     private float angleBase;
-    private float angleCurrent; // used for magnetic rotation
+    private float angleCurrent; // used for rotation testing
     private float angleTarget;
     private float angleMagnetometer;
+
 
     {
 
@@ -246,9 +249,10 @@ public class ViewCompass extends View {
             canvas.restore();
 
         }
-
-        drawTarget(canvas, angleTarget);
         drawMagnetometerArrow(canvas,angleMagnetometer);
+
+        drawTarget(canvas, angleTarget + angleMagnetometer);
+
         postInvalidateDelayed(16); // 60 fps
     }
 
@@ -301,6 +305,8 @@ public class ViewCompass extends View {
     PointF pointTargetPosition;
 
     private void drawTarget(Canvas canvas, float angle) {
+
+
         pointTargetPosition = getPointOnCircle((circleRadius - circleInnerPadding) - 20, angle, new PointF(centerX, centerY));
 
         canvas.save();
@@ -335,7 +341,7 @@ public class ViewCompass extends View {
     }
 
     public void setAngleMagnetometer(float angleMagnetometer) {
-        log("setAngleMagnetometer: " +angleMagnetometer);
+     //   log("setAngleMagnetometer: " +angleMagnetometer);
         this.angleMagnetometer = angleMagnetometer;
     }
 }

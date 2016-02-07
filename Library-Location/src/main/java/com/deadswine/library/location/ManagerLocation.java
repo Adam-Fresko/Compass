@@ -72,8 +72,8 @@ public class ManagerLocation {
             @Override
             public void onLocationChanged(Location location) {
 
-                log("Latitude GPS : " + location.getLatitude());
-                log("Longitude GPS: " + location.getLongitude());
+           //     log("Latitude GPS : " + location.getLatitude());
+           //     log("Longitude GPS: " + location.getLongitude());
 
                 Otto.getInstance().post(new EventLocationChanged(location));
             }

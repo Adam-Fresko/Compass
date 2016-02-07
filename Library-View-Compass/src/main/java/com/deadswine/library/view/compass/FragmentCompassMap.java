@@ -49,9 +49,11 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
 
 
     private InterfaceMap mInterface;
+
     public interface InterfaceMap {
 
         void onMapTargetChoosen(LatLng targetLatLng);
+        void onMapLocationChanged(LatLng targetLatLng);
     }
 
     public void addInterface(InterfaceMap mInterface) {
@@ -91,7 +93,7 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
         if (mMapMarker != null)
             mMapMarker.remove();
 
-        if(mInterface ==null)
+        if (mInterface == null)
             throw new UnknownError("You forgot to set interface");
 
         MarkerOptions markerOptions = new MarkerOptions();
@@ -99,7 +101,7 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
         markerOptions.draggable(true);
 
         mMapMarker = mGoogleMap.addMarker(markerOptions);
-
+        mInterface.onMapTargetChoosen(mMapMarker.getPosition());
         drawLineBetweenLocationAndTarget();
     }
 
@@ -120,6 +122,8 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
 
         mMapMarkerLocation = mGoogleMap.addMarker(markerOptions);
 
+
+
         drawLineBetweenLocationAndTarget();
     }
 
@@ -139,6 +143,12 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
         } else {
             mPolyline.setPoints(tmp);
         }
+
+
+        if (mInterface == null)
+            throw new UnknownError("You forgot to set interface");
+        mInterface.onMapLocationChanged(mMapMarkerLocation.getPosition());
+
 
         printDegreesText();
 
@@ -165,5 +175,6 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
     @Override
     public void onMarkerDragEnd(Marker marker) {
         drawLineBetweenLocationAndTarget();
+        mInterface.onMapTargetChoosen(mMapMarker.getPosition());
     }
 }
