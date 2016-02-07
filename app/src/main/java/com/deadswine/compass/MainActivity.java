@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.deadswine.library.location.ManagerLocation;
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.Otto;
+import com.deadswine.library.view.compass.FragmentCompass;
 import com.deadswine.library.view.compass.FragmentCompassMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.otto.Subscribe;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     private ViewPager mViewPager;
     private ViewPagerAdapter mAdapter;
 
+    private FragmentCompass mFragmentCompass;
     private FragmentCompassMap mFragmentMapCompass;
 
     @Override
@@ -45,10 +47,12 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         tvHello = (TextView) findViewById(R.id.main_tv_hello);
 
+        mFragmentCompass = new FragmentCompass();
 
         mFragmentMapCompass = new FragmentCompassMap();
         mFragmentMapCompass.addInterface(this);
-        getAdapter().addFragment(new FragmentCompass(), "Compass", false);
+
+        getAdapter().addFragment(mFragmentCompass, "Compass", false);
         getAdapter().addFragment(mFragmentMapCompass, "Map", true);
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
         mViewPager.setAdapter(getAdapter());

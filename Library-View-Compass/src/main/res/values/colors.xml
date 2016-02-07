@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <color name="compass_scale">#FFBDBDBD</color>
+    <color name="compass_scale_letters">#ffffff</color>
+
+    <color name="compass_ring_outer">#FFBDBDBD</color>
+    <color name="compass_ring_inner">#ffd6d6</color>
+
+
+    <color name="compass_inner_gradient_start">#42a5f5</color>
+    <color name="compass_inner_gradient_end">#01579b</color>
+
+</resources>
