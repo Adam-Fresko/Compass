@@ -7,6 +7,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
+import com.deadswine.library.location.Otto.Otto;
+
 
 /**
  * Created by Adam Fręśko - Deadswine Studio on 07.02.2016.
@@ -115,7 +119,7 @@ public class ManagerMagnetometer implements SensorEventListener {
                 rotationInDegrees = Math.toDegrees(rotationInRadians);
 
                // log("Magnetometer Rotation in degrees: " + rotationInDegrees);
-
+                Otto.getInstance().post(new EventMagneticDirectionChanged(rotationInDegrees));
             }
         }
     }
