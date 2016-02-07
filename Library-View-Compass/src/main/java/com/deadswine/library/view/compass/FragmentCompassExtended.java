@@ -17,7 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment;
  * Deadswine.com
  */
 
-public class FragmentCompass  extends Fragment{
+public class FragmentCompassExtended extends Fragment{
     private final String TAG = this.getClass().getSimpleName();
     boolean isDebug = true;
     public void log(String log) {

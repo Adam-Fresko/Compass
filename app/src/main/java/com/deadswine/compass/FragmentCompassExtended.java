@@ -1,10 +1,7 @@
 package com.deadswine.compass;
 
-import android.util.Log;
-
 import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
 import com.deadswine.library.location.Otto.Otto;
-import com.deadswine.library.view.compass.FragmentCompass;
 import com.squareup.otto.Subscribe;
 
 
@@ -13,21 +10,21 @@ import com.squareup.otto.Subscribe;
  * Deadswine.com
  */
 
-public class FragmentCompassExtended extends FragmentCompass {
+public class FragmentCompassExtended extends com.deadswine.library.view.compass.FragmentCompassExtended {
 
 
     @Override
     public void onPause() {
         super.onPause();
 
-        Otto.getInstance().register(this);
+        Otto.getInstance().unregister(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Otto.getInstance().register(this);
 
-        Otto.getInstance().unregister(this);
     }
 
 

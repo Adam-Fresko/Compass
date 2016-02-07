@@ -240,7 +240,8 @@ public class ViewCompass extends View {
             angleCurrent += 1;
 
         } else {
-            canvas.rotate(angleBase + angleMagnetometer, centerX, centerY); // -90 makes fist letter pointing to top
+            // FIXME this will also require some smoothing as readings jump allover 360 // but it works atm
+            canvas.rotate(angleBase + (-angleMagnetometer), centerX, centerY); // -90 makes fist letter pointing to top
             drawTextDirections(canvas);
             canvas.restore();
 

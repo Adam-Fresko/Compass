@@ -21,7 +21,7 @@ import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.EventMagneticDirectionChanged;
 import com.deadswine.library.location.Otto.Otto;
-import com.deadswine.library.view.compass.FragmentCompass;
+import com.deadswine.library.view.compass.FragmentCompassExtended;
 import com.deadswine.library.view.compass.FragmentCompassMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.squareup.otto.Subscribe;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     private ViewPager mViewPager;
     private ViewPagerAdapter mAdapter;
 
-    private FragmentCompass mFragmentCompass;
+    private FragmentCompassExtended mFragmentCompass;
     private FragmentCompassMap mFragmentMapCompass;
     private String TAG = this.getClass().getSimpleName();
 
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         tvHello = (TextView) findViewById(R.id.main_tv_hello);
 
-        mFragmentCompass = new FragmentCompass();
+        mFragmentCompass = new com.deadswine.compass.FragmentCompassExtended();
 
         mFragmentMapCompass = new FragmentCompassMap();
         mFragmentMapCompass.addInterface(this);
@@ -151,13 +151,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         mFragmentMapCompass.setLocation(event.getLocation());
     }
 
-    @Subscribe
-    public void onEventMagneticDirectionChanged(EventMagneticDirectionChanged event) {
 
-
-        Log.d(TAG, "onEventMagneticDirectionChanged: " + event.getAngle());
-
-    }
 
 
     @Override
