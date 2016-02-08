@@ -96,8 +96,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     protected void onResume() {
         super.onResume();
 
-
-
         Otto.getInstance().register(this);
 
         ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
@@ -161,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
                     ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
                 }
-
             }
 
         }
