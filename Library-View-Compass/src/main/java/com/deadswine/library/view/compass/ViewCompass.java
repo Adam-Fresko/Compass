@@ -81,6 +81,10 @@ public class ViewCompass extends View {
     private int mCenterX;
     private int mCenterY;
 
+    int size5;
+    int size10;
+    int sizeFar;
+
     private float mAngleBase;
     private float mAngleCurrent; // used for rotation testing
     private float mAngleTarget;
@@ -231,6 +235,8 @@ public class ViewCompass extends View {
         );
     }
 
+
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -241,8 +247,8 @@ public class ViewCompass extends View {
         mCenterY = getHeight() / 2;
 
         int size5 = UtilitiesView.dpToPx(getContext(), 5);
-        int size10 = UtilitiesView.dpToPx(getContext(), 10);
-        int sizeFar = (mCircleRadius - mCircleInnerPadding) - (size10 * 4);
+        size10 = UtilitiesView.dpToPx(getContext(), 10);
+      sizeFar = (mCircleRadius - mCircleInnerPadding) - (size10 * 4);
 
         mAngleBase = -90;
         mAngleCurrent = 0;
@@ -369,10 +375,9 @@ public class ViewCompass extends View {
 
     PointF pointTargetPosition;
 
-
     private void drawTarget(Canvas canvas, float angle) {
 
-        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
+        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding)- (size10 * 2), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
 
@@ -383,7 +388,6 @@ public class ViewCompass extends View {
         canvas.restore();
     }
 
-
     private void drawMagnetometerArrow(Canvas canvas) {
         canvas.save();
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
@@ -392,7 +396,6 @@ public class ViewCompass extends View {
 
         canvas.restore();
     }
-
 
     public void setAngleTarget(float mAngleTarget) {
 
@@ -407,18 +410,5 @@ public class ViewCompass extends View {
 
     }
 
-    int point = 0;
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-            log("on touch: " + point);
-        }
-
-        return super.onTouchEvent(event);
-    }
 }
 
