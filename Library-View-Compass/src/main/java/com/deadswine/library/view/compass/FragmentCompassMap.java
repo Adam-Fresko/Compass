@@ -117,6 +117,10 @@ public class FragmentCompassMap extends Fragment implements OnMapReadyCallback, 
             mMapMarkerLocation.remove();
         }
 
+        if (location == null) {
+            return;
+        }
+
         LatLng tmp = new LatLng(location.getLatitude(), location.getLongitude());
 
         MarkerOptions markerOptions = new MarkerOptions();
