@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.deadswine.library.location.ManagerLocation;
+import com.deadswine.library.location.ManagerLocationGoogle;
 import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
 import com.deadswine.library.location.Otto.EventRequestPermission;
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 //            Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
 //                    //.setAction("Action", null)
 //                    .show();
-
+        ManagerLocationGoogle.getInstance(getApplicationContext()).locationPause();
         Otto.getInstance().unregister(this);
 
 
@@ -98,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         Otto.getInstance().register(this);
 
-        ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
-
+       // ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
+        ManagerLocationGoogle.getInstance(getApplicationContext()).locationStart();
         ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
         Snackbar.make(findViewById(R.id.toolbar), "Location tracking enabled", Snackbar.LENGTH_LONG)
