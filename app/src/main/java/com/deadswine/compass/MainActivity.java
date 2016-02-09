@@ -83,21 +83,24 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
         super.onPause();
 
         ManagerMagnetometer.getInstance(getApplicationContext()).stop();
-        ManagerLocationGoogle.getInstance(getApplicationContext()).locationPause();
 
+//            Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
+//                    //.setAction("Action", null)
+//                    .show();
+        ManagerLocationGoogle.getInstance(getApplicationContext()).locationPause();
         Otto.getInstance().unregister(this);
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         Otto.getInstance().register(this);
 
-      //  ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
-
+       // ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
         ManagerLocationGoogle.getInstance(getApplicationContext()).locationStart();
-
         ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
         Snackbar.make(findViewById(R.id.toolbar), "Location tracking enabled", Snackbar.LENGTH_LONG)
@@ -157,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
                     ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
                 }
-
             }
 
         }
