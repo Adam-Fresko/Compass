@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -455,6 +456,8 @@ public class ViewCompass extends View {
 
 
     PointF pointTargetPosition;
+    Matrix matrix = new Matrix();
+
 
     private void drawTarget(Canvas canvas, float angle) {
 
@@ -463,11 +466,34 @@ public class ViewCompass extends View {
         canvas.save();
 
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
-        canvas.rotate(100, pointTargetPosition.x, pointTargetPosition.y); // rotate target arrow to point outside of compass
-
         canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
 
-        canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
+
+        //  matrix.postTranslate(mCenterX, mCenterY);
+
+
+        if (pointTargetPosition.x < mCenterX) {
+            matrix.postRotate(angle,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
+            matrix.postRotate(-270,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
+
+
+        } else {
+            matrix.postRotate(angle,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
+            matrix.postRotate(270 + 180,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
+
+
+        }
+
+        matrix.postTranslate(pointTargetPosition.x - mBitmapTarget.getWidth() / 2, pointTargetPosition.y - mBitmapTarget.getWidth() / 2);
+
+        //  matrix.postTranslate(mCenterX- (mBitmapTarget.getWidth() / 2), mCenterY-(mBitmapTarget.getHeight() / 2));
+
+
+        // canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
+        canvas.drawBitmap(mBitmapTarget, matrix, mPaintInnerRose);
+//canvas.rotate(angle, mCenterX, mCenterY);
+        //  canvas.drawBitmap(mBitmapTarget, mCenterX - (mBitmapTarget.getWidth() / 2), mCenterY - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
+        matrix.reset();
         canvas.restore();
     }
 
