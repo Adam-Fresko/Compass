@@ -463,6 +463,8 @@ public class ViewCompass extends View {
         canvas.save();
 
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
+        canvas.rotate(100, pointTargetPosition.x, pointTargetPosition.y); // rotate target arrow to point outside of compass
+
         canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
 
         canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
