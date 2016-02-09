@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -13,7 +12,6 @@ import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.deadswine.library.view.compass.Utilities.UtilitiesView;
@@ -63,15 +61,11 @@ public class ViewCompass extends View {
 
     private Path mPathCompassArrow;
     private Path mPathCompassArrowMirror;
-
-
     private int mWidthArrowWidest;
     private int mWidthArrowMiddle;
     private int mWidthArrowNarrowes;
 
-
     private int mCircleRadius;
-    private int mCircleRadiusInner;
 
     private int mCircleRingOuterWidth;
     private int mCircleRingOuterPadding;
@@ -79,7 +73,6 @@ public class ViewCompass extends View {
     private int mCircleRingInnerWidth;
     private int mCircleRingInnerPadding;
     private int mCircleInnerPadding;
-    private int mCircleInnerRadius;
     private int mTargetWidth;
 
     private int mScalePadding;
@@ -92,22 +85,20 @@ public class ViewCompass extends View {
     int size15;
     int sizeFar;
 
+    private  PointF mPointTargetPosition;
+    private  Matrix mMatrix;
+
     private float mAngleBase;
     private float mAngleCurrent; // used for rotation testing
     private float mAngleTarget;
     private float mAngleMagnetometer;
 
-    private float mAngleMagnetometerOld;
-    private float mAngleMagnetometerTarget;
-
     private boolean mIsAngleTargetSet;
     private boolean mIsAngleMagnetometerSet;
 
-    private int mFramesLeftToDraw;
-
     {
-        mFramesLeftToDraw = 0;
 
+        mMatrix= new Matrix();
 
         mLetters = new String[]{
                 "N", "NE", "E", "SE", "S", "SW", "W", "NW"
@@ -301,7 +292,6 @@ public class ViewCompass extends View {
         mPathCompassArrowMirror.lineTo(mCenterX + mWidthArrowWidest * 2, mCenterY);
         mPathCompassArrowMirror.close();
 
-
         mPathScaleLarge.reset();
         mPathScaleLarge.moveTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
         mPathScaleLarge.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
@@ -309,23 +299,12 @@ public class ViewCompass extends View {
         mPathScaleLarge.lineTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)));
         mPathScaleLarge.close();
 
-
         mPathScale.reset();
         mPathScale.moveTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
         mPathScale.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)) + size5);
         mPathScale.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)) + size5);
         mPathScale.lineTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)));
         mPathScale.close();
-
-
-//        mPathScaleLarge.reset();
-//
-//        mPathScaleLarge.moveTo(mCenterX, mCenterY - size10);
-//        mPathScaleLarge.lineTo(mCenterX , mCenterY - sizeFar);
-//        mPathScaleLarge.lineTo(mCenterX + size5, mCenterY - sizeFar);
-//        mPathScaleLarge.lineTo(mCenterX + size5, mCenterY - size10);
-//
-//        mPathScaleLarge.close();
 
     }
 
@@ -435,8 +414,6 @@ public class ViewCompass extends View {
                 canvas.drawPath(mPathScale, mPaintScale);
 
             }
-            //      canvas.rotate(8f, mCenterX, mCenterY);
-
 
             canvas.rotate(16f, mCenterX, mCenterY);
 
@@ -449,51 +426,37 @@ public class ViewCompass extends View {
             }
         }
 
-
         canvas.restore();
 
     }
 
-
-    PointF pointTargetPosition;
-    Matrix matrix = new Matrix();
-
-
     private void drawTarget(Canvas canvas, float angle) {
 
-        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding) - (size10 * 2), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
+        mPointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding) - (size10 * 2), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
-
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
-        canvas.drawCircle(pointTargetPosition.x, pointTargetPosition.y, mTargetWidth, mPaintTarget);
+        canvas.drawCircle(mPointTargetPosition.x, mPointTargetPosition.y, mTargetWidth, mPaintTarget);
 
 
-        //  matrix.postTranslate(mCenterX, mCenterY);
+        //  mMatrix.postTranslate(mCenterX, mCenterY);
 
 
-        if (pointTargetPosition.x < mCenterX) {
-            matrix.postRotate(angle,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
-            matrix.postRotate(-270,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
-
+        if (mPointTargetPosition.x < mCenterX) {
+            mMatrix.postRotate(angle, mBitmapTarget.getWidth() / 2, mBitmapTarget.getHeight() / 2);
+            mMatrix.postRotate(-270, mBitmapTarget.getWidth() / 2, mBitmapTarget.getHeight() / 2);
 
         } else {
-            matrix.postRotate(angle,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
-            matrix.postRotate(270 + 180,mBitmapTarget.getWidth() / 2,mBitmapTarget.getHeight() / 2);
-
+            mMatrix.postRotate(angle, mBitmapTarget.getWidth() / 2, mBitmapTarget.getHeight() / 2);
+            mMatrix.postRotate(270 + 180, mBitmapTarget.getWidth() / 2, mBitmapTarget.getHeight() / 2);
 
         }
 
-        matrix.postTranslate(pointTargetPosition.x - mBitmapTarget.getWidth() / 2, pointTargetPosition.y - mBitmapTarget.getWidth() / 2);
+        mMatrix.postTranslate(mPointTargetPosition.x - mBitmapTarget.getWidth() / 2, mPointTargetPosition.y - mBitmapTarget.getWidth() / 2);
 
-        //  matrix.postTranslate(mCenterX- (mBitmapTarget.getWidth() / 2), mCenterY-(mBitmapTarget.getHeight() / 2));
+        canvas.drawBitmap(mBitmapTarget, mMatrix, mPaintInnerRose);
 
-
-        // canvas.drawBitmap(mBitmapTarget, pointTargetPosition.x - (mBitmapTarget.getWidth() / 2), pointTargetPosition.y - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
-        canvas.drawBitmap(mBitmapTarget, matrix, mPaintInnerRose);
-//canvas.rotate(angle, mCenterX, mCenterY);
-        //  canvas.drawBitmap(mBitmapTarget, mCenterX - (mBitmapTarget.getWidth() / 2), mCenterY - (mBitmapTarget.getHeight() / 2), mPaintInnerRose);
-        matrix.reset();
+        mMatrix.reset();
         canvas.restore();
     }
 
