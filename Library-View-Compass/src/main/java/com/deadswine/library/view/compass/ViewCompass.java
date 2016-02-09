@@ -31,7 +31,6 @@ public class ViewCompass extends View {
         Log.d(TAG, log);
     }
 
-
     private int[] mGradientColors;
     private float[] mGradientSteps;
 
@@ -50,6 +49,7 @@ public class ViewCompass extends View {
     private Paint mPaintInnerText;
     private Paint mPaintMagnetometerArrow;
     private Paint mPaintMagnetometerArrowMirror;
+    private Paint mPaintScale;
     private Paint mPaintPin;
 
     private Paint mPaintTarget;
@@ -57,8 +57,13 @@ public class ViewCompass extends View {
     private Bitmap mBitmapTarget;
 
     private Path mPathInnerCircle;
+    private Path mPathScale;
+    private Path mPathScaleLarge;
+
     private Path mPathCompassArrow;
     private Path mPathCompassArrowMirror;
+
+
     private int mWidthArrowWidest;
     private int mWidthArrowMiddle;
     private int mWidthArrowNarrowes;
@@ -83,6 +88,7 @@ public class ViewCompass extends View {
 
     int size5;
     int size10;
+    int size15;
     int sizeFar;
 
     private float mAngleBase;
@@ -114,7 +120,7 @@ public class ViewCompass extends View {
 
         mGradientSteps = new float[]{
                 0f,
-                0.85f,
+                0.80f,
                 1f
         };
 
@@ -183,16 +189,25 @@ public class ViewCompass extends View {
         mPaintRingInner.setStyle(Paint.Style.FILL);
         mPaintRingInner.setAntiAlias(true);
 
-        mPaintPin= new Paint();
+        mPaintPin = new Paint();
         mPaintPin.setColor(getResources().getColor(R.color.compass_pin));
         mPaintPin.setStyle(Paint.Style.FILL);
-        mPaintPin.setStrokeWidth(UtilitiesView.dpFromPx(getContext(),3));
+        mPaintPin.setStrokeWidth(UtilitiesView.dpFromPx(getContext(), 3));
         mPaintPin.setAntiAlias(true);
+
+
+        mPaintScale = new Paint();
+        mPaintScale.setColor(getResources().getColor(android.R.color.holo_red_dark));
+        mPaintScale.setStyle(Paint.Style.FILL);
+        mPaintScale.setStrokeWidth(UtilitiesView.dpFromPx(getContext(), 3));
+        mPaintScale.setAntiAlias(true);
 
 
         mPathInnerCircle = new Path();
         mPathCompassArrow = new Path();
         mPathCompassArrowMirror = new Path();
+        mPathScale = new Path();
+        mPathScaleLarge = new Path();
 
         mCircleRingOuterWidth = UtilitiesView.dpToPx(getContext(), 12);
         mCircleRingOuterPadding = mCircleRingOuterWidth;
@@ -236,7 +251,6 @@ public class ViewCompass extends View {
     }
 
 
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -246,9 +260,10 @@ public class ViewCompass extends View {
         mCenterX = getWidth() / 2;
         mCenterY = getHeight() / 2;
 
-        int size5 = UtilitiesView.dpToPx(getContext(), 5);
+        size5 = UtilitiesView.dpToPx(getContext(), 5);
         size10 = UtilitiesView.dpToPx(getContext(), 10);
-      sizeFar = (mCircleRadius - mCircleInnerPadding) - (size10 * 4);
+        size15 = UtilitiesView.dpToPx(getContext(), 15);
+        sizeFar = (mCircleRadius - mCircleInnerPadding) - (size10 * 4);
 
         mAngleBase = -90;
         mAngleCurrent = 0;
@@ -284,6 +299,32 @@ public class ViewCompass extends View {
         mPathCompassArrowMirror.lineTo(mCenterX + mWidthArrowMiddle, mCenterY + size10);
         mPathCompassArrowMirror.lineTo(mCenterX + mWidthArrowWidest * 2, mCenterY);
         mPathCompassArrowMirror.close();
+
+
+        mPathScaleLarge.reset();
+        mPathScaleLarge.moveTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
+        mPathScaleLarge.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
+        mPathScaleLarge.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)));
+        mPathScaleLarge.lineTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)));
+        mPathScaleLarge.close();
+
+
+        mPathScale.reset();
+        mPathScale.moveTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)));
+        mPathScale.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 2)) + size5);
+        mPathScale.lineTo(mCenterX - 2, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)) + size5);
+        mPathScale.lineTo(mCenterX, mCenterY - ((mCircleRadius - mCircleInnerPadding) - (size5 * 4)));
+        mPathScale.close();
+
+
+//        mPathScaleLarge.reset();
+//
+//        mPathScaleLarge.moveTo(mCenterX, mCenterY - size10);
+//        mPathScaleLarge.lineTo(mCenterX , mCenterY - sizeFar);
+//        mPathScaleLarge.lineTo(mCenterX + size5, mCenterY - sizeFar);
+//        mPathScaleLarge.lineTo(mCenterX + size5, mCenterY - size10);
+//
+//        mPathScaleLarge.close();
 
     }
 
@@ -325,6 +366,9 @@ public class ViewCompass extends View {
         if (mIsAngleTargetSet) {
             drawTarget(canvas, mAngleTarget);
         }
+
+
+        drawScale(canvas);
 
         postInvalidateDelayed(16); // 60 fps
 
@@ -373,11 +417,48 @@ public class ViewCompass extends View {
 
     }
 
+    private void drawScale(Canvas canvas) {
+
+        int scalesToDraw = 6;
+        int scalesIterations = 8;
+        canvas.save();
+
+        canvas.rotate(mAngleBase, mCenterX, mCenterY);
+
+        for (int i = 0; i < scalesIterations; i++) {
+            canvas.rotate(8f, mCenterX, mCenterY);
+            for (int j = 0; j < scalesToDraw; j++) {
+                canvas.rotate(2.8f, mCenterX, mCenterY);
+                canvas.drawPath(mPathScaleLarge, mPaintScale);
+                canvas.rotate(2.8f, mCenterX, mCenterY);
+                canvas.drawPath(mPathScale, mPaintScale);
+
+            }
+            //      canvas.rotate(8f, mCenterX, mCenterY);
+
+
+            canvas.rotate(16f, mCenterX, mCenterY);
+
+            for (int j = 0; j < scalesToDraw; j++) {
+                canvas.rotate(2.7f, mCenterX, mCenterY);
+                canvas.drawPath(mPathScaleLarge, mPaintScale);
+                canvas.rotate(2.7f, mCenterX, mCenterY);
+                canvas.drawPath(mPathScale, mPaintScale);
+
+            }
+        }
+
+
+        canvas.restore();
+
+    }
+
+
     PointF pointTargetPosition;
 
     private void drawTarget(Canvas canvas, float angle) {
 
-        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding)- (size10 * 2), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
+        pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding) - (size10 * 2), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
 
         canvas.save();
 
