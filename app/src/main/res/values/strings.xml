@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Compass</string>
     <string name="action_settings">Settings</string>
+    <string name="gps_not_enabled">Gps is not enabled</string>
+    <string name="action_enable">Enable</string>
+    <string name="gps_tracking_enabled">Location tracking enabled</string>
 </resources>

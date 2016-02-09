@@ -104,9 +104,11 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
             mLocationRequest.setFastestInterval(UPDATE_INTERVAL_FASTEST);
             mLocationRequest.setSmallestDisplacement(UPDATE_DISTANCE);
 
+
             mGoogleApiClient = new GoogleApiClient.Builder(mContext).addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
+
                     .build();
             mGoogleApiClient.connect();
 
@@ -151,6 +153,7 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
         mLocationSettingsRequestBuilder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
+                .setAlwaysShow(true)
                 .setNeedBle(true);
 
         result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequestBuilder
@@ -208,15 +211,19 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
                 // requests here.
 
 
-
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 // Location settings are not satisfied. But could be fixed by showing the user
                 // a dialog.
                 // Show the dialog by calling startResolutionForResult(),
                 // and check the result in onActivityResult().
+                if (locationSettingsStates.isGpsPresent() && locationSettingsStates.isGpsUsable()) {
 
-                Otto.getInstance().post(new EventRequestGps());
+                } else {
+                    Otto.getInstance().post(new EventRequestGps()); // Yeah i know launching google gps dialog would be kind of better ;p
+                }
+
+
                 break;
             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                 // Location settings are not satisfied. However, we have no way to fix the

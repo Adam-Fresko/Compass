@@ -1,7 +1,9 @@
 package com.deadswine.compass;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -22,6 +24,7 @@ import com.deadswine.library.location.ManagerLocation;
 import com.deadswine.library.location.ManagerLocationGoogle;
 import com.deadswine.library.location.ManagerMagnetometer;
 import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.EventRequestGps;
 import com.deadswine.library.location.Otto.EventRequestPermission;
 import com.deadswine.library.location.Otto.Otto;
 import com.deadswine.library.view.compass.FragmentCompassExtended;
@@ -84,12 +87,8 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         ManagerMagnetometer.getInstance(getApplicationContext()).stop();
 
-//            Snackbar.make(view, "Location tracking disable", Snackbar.LENGTH_LONG)
-//                    //.setAction("Action", null)
-//                    .show();
         ManagerLocationGoogle.getInstance(getApplicationContext()).locationPause();
         Otto.getInstance().unregister(this);
-
 
     }
 
@@ -99,13 +98,10 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
 
         Otto.getInstance().register(this);
 
-       // ManagerLocation.getInstance(getApplicationContext()).locationToggle() ;
         ManagerLocationGoogle.getInstance(getApplicationContext()).locationStart();
         ManagerMagnetometer.getInstance(getApplicationContext()).start();
 
-        Snackbar.make(findViewById(R.id.toolbar), "Location tracking enabled", Snackbar.LENGTH_LONG)
-                //.setAction("Action", null)
-                .show();
+
 
     }
 
@@ -113,6 +109,20 @@ public class MainActivity extends AppCompatActivity implements FragmentCompassMa
     public void onEventRequestPermission(EventRequestPermission event) {
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+
+    }
+
+    @Subscribe
+    public void onEventRequestGps( EventRequestGps event) {
+
+        Snackbar.make(findViewById(R.id.toolbar), R.string.gps_not_enabled, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.action_enable, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .show();
 
     }
 
