@@ -11,14 +11,21 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.deadswine.library.location.Otto.EventLocationChanged;
+import com.deadswine.library.location.Otto.EventRequestGps;
 import com.deadswine.library.location.Otto.EventRequestPermission;
 import com.deadswine.library.location.Otto.Otto;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 
 /**
@@ -26,7 +33,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
  * Deadswine.com
  */
 
-public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
     private final String TAG = this.getClass().getSimpleName();
     boolean isDebug = true;
 
@@ -46,6 +53,7 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     LocationSettingsRequest.Builder mLocationSettingsRequestBuilder;
+    PendingResult<LocationSettingsResult> result;
 
     private boolean isInProggress;
 
@@ -84,7 +92,7 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            Toast.makeText(mContext, "Location Permissions is not granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, R.string.gps_permmistions_false, Toast.LENGTH_SHORT).show();
 
             Otto.getInstance().post(new EventRequestPermission());
 
@@ -142,6 +150,13 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
         // WE ALREDY checked permission
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
+        mLocationSettingsRequestBuilder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
+                .setNeedBle(true);
+
+        result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequestBuilder
+                .build());
+        result.setResultCallback(this);
+
     }
 
     @Override
@@ -179,5 +194,36 @@ public class ManagerLocationGoogle implements GoogleApiClient.ConnectionCallback
     @Override
     public void onLocationChanged(Location location) {
         Otto.getInstance().post(new EventLocationChanged(location));
+    }
+
+    @Override
+    public void onResult(LocationSettingsResult locationSettingsResult) {
+        final Status status = locationSettingsResult.getStatus();
+        final LocationSettingsStates locationSettingsStates = locationSettingsResult.getLocationSettingsStates();
+
+
+        switch (status.getStatusCode()) {
+            case LocationSettingsStatusCodes.SUCCESS:
+                // All location settings are satisfied. The client can initialize location
+                // requests here.
+
+
+
+                break;
+            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                // Location settings are not satisfied. But could be fixed by showing the user
+                // a dialog.
+                // Show the dialog by calling startResolutionForResult(),
+                // and check the result in onActivityResult().
+
+                Otto.getInstance().post(new EventRequestGps());
+                break;
+            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                // Location settings are not satisfied. However, we have no way to fix the
+                // settings so we won't show the dialog.
+
+                Toast.makeText(mContext, R.string.gps_aviabiality_false, Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 }

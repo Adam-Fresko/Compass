@@ -369,7 +369,6 @@ public class ViewCompass extends View {
 
     PointF pointTargetPosition;
 
-
     private void drawTarget(Canvas canvas, float angle) {
 
         pointTargetPosition = UtilitiesView.getPosition(mCenterX, mCenterY, (mCircleRadius - mCircleInnerPadding), angle);//= UtilitiesView.getPointOnCircle((mCircleRadius - mCircleInnerPadding) - 20, angle, new PointF(mCenterX, mCenterY));
@@ -383,7 +382,6 @@ public class ViewCompass extends View {
         canvas.restore();
     }
 
-
     private void drawMagnetometerArrow(Canvas canvas) {
         canvas.save();
         canvas.rotate(-mAngleMagnetometer, mCenterX, mCenterY);
@@ -392,7 +390,6 @@ public class ViewCompass extends View {
 
         canvas.restore();
     }
-
 
     public void setAngleTarget(float mAngleTarget) {
 
@@ -408,7 +405,6 @@ public class ViewCompass extends View {
     }
 
     int point = 0;
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

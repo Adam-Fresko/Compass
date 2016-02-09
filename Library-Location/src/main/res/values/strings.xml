@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Library-Location</string>
+    <string name="gps_aviabiality_false">GPS is UNAVIALIABLE</string>
+    <string name="gps_permmistions_false">Location Permissions is not granted</string>
 </resources>
